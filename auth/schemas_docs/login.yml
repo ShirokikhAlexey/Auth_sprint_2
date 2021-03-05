@@ -1,0 +1,38 @@
+Авторизация пользователя по логину или email. Получение токена сессии.
+    ---
+    parameters:
+      - name: password
+        in: body
+        type: string
+        required: true
+        description:  Пароль пользователя
+      - name: device
+        in: body
+        type: string
+        required: false
+        default: 'web'
+        description:  Тип устройства, с которого осуществляется вход
+      - name: email
+        in: body
+        type: string
+        required: true/false
+        description:  Email пользователя
+      - name: login
+        in: body
+        type: string
+        required: false/true
+        description:  Логин пользователя
+    responses:
+      200:
+        description:  Возвращает токен авторизации
+        schema:
+          {
+          "type": "object",
+          "properties": {
+            "error": {"type": "string"},
+            "result": {"type":  "object",
+                       "properties": {
+                       "token": {"type": "string"}
+                       }}
+            }
+          }

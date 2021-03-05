@@ -1,0 +1,29 @@
+Регистрация пользователя по email.
+    ---
+    parameters:
+      - name: password
+        in: body
+        type: string
+        required: true
+        description:  Пароль пользователя
+      - name: email
+        in: body
+        type: string
+        required: true
+        description:  Email пользователя
+      - name: login
+        in: body
+        type: string
+        required: true
+        description:  Логин пользователя
+    responses:
+      200:
+        description:  Регистрация пользователя
+        schema:
+          {
+          "type": "object",
+          "properties": {
+            "error": {"type": "string"},
+            "result": {"type":  "string"}
+            }
+          }

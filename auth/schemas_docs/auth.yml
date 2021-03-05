@@ -1,0 +1,24 @@
+Проверка валидности токена авторизации
+    ---
+    parameters:
+      - name: Authorization
+        in: headers
+        type: string
+        required: true
+        default: None
+        description:  Токен авторизации
+    responses:
+      200:
+        description:  Возвращает данные по сессии (id пользователя, время входа)
+        schema:
+          {
+          "type": "object",
+          "properties": {
+            "error": {"type": "string"},
+            "result": {"type":  "object",
+                       "properties": {
+                       "user": {"type": "string"},
+                       "logged_in": {"type": "number"}
+                       }}
+            }
+          }

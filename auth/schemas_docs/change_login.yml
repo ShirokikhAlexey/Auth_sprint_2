@@ -1,0 +1,26 @@
+Смена логина пользователя
+    ---
+    parameters:
+      - name: Authorization
+        in: headers
+        type: string
+        required: true
+        default: None
+        description:  Токен авторизации
+      - name: new_login
+        in: body
+        type: string
+        required: true
+        default: None
+        description:  Новый логин
+    responses:
+      200:
+        description:  Смена пароля пользователя
+        schema:
+          {
+          "type": "object",
+          "properties": {
+            "error": {"type": "string"},
+            "result": {"type":  "string"}
+            }
+          }

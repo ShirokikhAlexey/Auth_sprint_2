@@ -1,0 +1,20 @@
+Выход из сессии
+    ---
+    parameters:
+      - name: Authorization
+        in: headers
+        type: string
+        required: true
+        default: None
+        description:  Токен авторизации
+    responses:
+      200:
+        description:  Выход из сессии
+        schema:
+          {
+          "type": "object",
+          "properties": {
+            "error": {"type": "string"},
+            "result": {"type":  "string"}
+            }
+          }

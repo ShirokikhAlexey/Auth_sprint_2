@@ -1,0 +1,41 @@
+Получение истории входов в аккаунт
+    ---
+    parameters:
+      - name: Authorization
+        in: headers
+        type: string
+        required: true
+        default: None
+        description:  Токен авторизации
+      - name: date_start
+        in: body
+        type: string
+        required: true
+        default: None
+        description: нижняя граница даты в формате Y-m-d
+      - name: date_end
+        in: body
+        type: string
+        required: true
+        default: None
+        description: верхняя граница даты в формате Y-m-d
+    responses:
+      200:
+        description:  Получение истории входов в аккаунт
+        schema:
+          {
+          "type": "object",
+          "properties": {
+            "error": {"type": "string"},
+            "result": {"type":  "array",
+                       "items": {
+                                  "type": "object",
+                                  "properties": {
+                                                  "login_time": {"type": "string"},
+                                                  "user_agent": {"type": "string"},
+                                                  "device": {"type": "string"}
+                                  }
+                       }
+                      }
+            }
+          }

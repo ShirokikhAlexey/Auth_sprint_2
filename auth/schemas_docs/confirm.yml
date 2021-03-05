@@ -1,0 +1,20 @@
+Подтвердждение email
+    ---
+    parameters:
+      - name: token
+        in: path
+        type: string
+        required: true
+        default: None
+        description:  Токен подтверждения email
+    responses:
+      200:
+        description:  Проверка корректности email
+        schema:
+          {
+          "type": "object",
+          "properties": {
+            "error": {"type": "string"},
+            "result": {"type": "string"}
+            }
+          }

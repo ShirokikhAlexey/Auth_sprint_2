@@ -1,0 +1,45 @@
+version: '3.7'
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres
+    network_mode: bridge
+    environment:
+      - POSTGRES_USER=postgre
+      - POSTGRES_PASSWORD=1234
+    ports:
+      - 25432:5432
+    volumes:
+      - ./database/users.sql:/docker-entrypoint-initdb.d/init.sql
+  auth:
+    build: .
+    container_name: auth_api
+    network_mode: bridge
+    command:
+        bash -c "pipenv run python main.py"
+    ports:
+      - "5000:5000"
+    expose:
+      - "5000"
+    depends_on:
+      - db
+      - redis_db
+      - test_smtp
+    links:
+      - db
+      - redis_db
+      - test_smtp
+    restart: on-failure
+  redis_db:
+    image: redis:alpine
+    network_mode: bridge
+    ports:
+      - "26379:6379"
+  test_smtp:
+    image: mailhog/mailhog
+    network_mode: bridge
+    logging:
+      driver: 'none'  # disable saving logs
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
