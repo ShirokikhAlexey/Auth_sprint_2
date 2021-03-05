@@ -20,6 +20,7 @@ python-dateutil = "==2.8.1"
 setuptools = "*"
 marshmallow = "==3.10.0"
 flask-mail = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"

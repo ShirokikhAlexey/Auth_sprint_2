@@ -1,3 +1,5 @@
+import requests
+
 from datetime import datetime, timedelta
 from uuid import uuid4
 
@@ -20,6 +22,8 @@ def log_in_user(session: SQLAlchemy().session, user_data: dict, device: str = 'w
     """
     if not user_data.get('login') and not user_data.get('email'):
         raise ServiceError('Specify your login or email')
+
+    check_captcha(user_data.get('recaptcha'))
 
     user = check_password(session, user_data.get('login'), user_data.get('email'), user_data.get('password'))
 
@@ -112,3 +116,18 @@ def get_device_by_name(session: SQLAlchemy().session, name: str = 'web'):
         raise ServiceError('Device not found')
 
     return device
+
+
+def check_captcha(captcha_response: str):
+    """
+    Проверка корректности токена recaptcha
+    :param captcha_response: токен recaptcha
+    :return:
+    """
+    data = {
+        'secret': settings.RECAPTCHA_PRIVATE_KEY,
+        'response': captcha_response
+    }
+    check = requests.post(settings.RECAPTCHA_VERIFY_URL, data)
+    if not check.json().get('success'):
+        raise ServiceError('Invalid recaptcha token')

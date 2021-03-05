@@ -6,6 +6,7 @@ class LoginSchema(Schema):
     device = fields.Str()
     email = fields.Email()
     login = fields.Str(validate=validate.Length(min=5))
+    recaptcha = fields.Str(required=True)
 
     @validates_schema
     def validate_anyof(self, data, **kwargs):
