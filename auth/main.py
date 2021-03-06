@@ -11,7 +11,7 @@ from db.init_tables import create_tables
 from db import redis
 from service.sign_up import sign_up_user
 from service.log_in import log_in_user
-from service.auth import check_auth_decorator
+from service.auth import check_auth_decorator, check_permissions_decorator
 from service.change_pwd import change_pwd
 from service.history import get_login_history
 from service.change_login import change_login
@@ -23,6 +23,7 @@ from schemas.login import LoginSchema
 from schemas.sign_up import SignUpSchema
 from schemas.history import HistorySchema
 from schemas.change_login import NewLogin
+from schemas.create_su import SUSchema
 
 
 app = Flask(__name__)
@@ -33,8 +34,8 @@ swagger = Swagger(app)
 
 
 @app.route('/', methods=['POST'])
-@check_auth_decorator
 @swag_from('schemas_docs/auth.yml')
+@check_permissions_decorator()
 def auth(token_data):
     """
     Проверка валидности токена авторизации
@@ -185,6 +186,27 @@ def history(token_data):
         return {'error': e.msg, 'result': None}
 
     return {'error': None, 'result': user_history}
+
+
+@app.route('/create_superuser', methods=['POST'])
+@check_permissions_decorator(['full'])
+def create_superuser(token_data):
+    session = db.session
+    req = request.get_json()
+
+    try:
+        SUSchema().load(req)
+    except ValidationError as e:
+        return {'error': e.messages, 'result': None}
+
+    req['roles'] = ['super_user']
+
+    try:
+        sign_up_user(mail, session, req)
+    except ServiceError as e:
+        return {'error': e.msg, 'result': None}
+
+    return {'error': None, 'result': "Account successfully created. Please, confirm your email."}
 
 
 def main():

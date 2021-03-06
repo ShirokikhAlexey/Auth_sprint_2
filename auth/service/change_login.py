@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import bcrypt
 from flask_sqlalchemy import SQLAlchemy
 
 from db.models import User
