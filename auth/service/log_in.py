@@ -144,6 +144,8 @@ def get_user_permissions(session, user_id: str):
         .join(Role, Role.id == RolePermission.role_id)
         .join(UserRole, UserRole.role_id == Role.id)
         .filter(UserRole.user_id == user_id)
+        .filter(UserRole.active)
+        .filter(RolePermission.active)
         .all()
     )
     if not permissions:

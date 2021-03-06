@@ -1,0 +1,32 @@
+Изменение ролей пользователя
+    ---
+    parameters:
+      - name: Authorization
+        in: headers
+        type: string
+        required: true
+        default: None
+        description:  Токен авторизации
+      - name: user_id
+        in: body
+        type: string
+        required: true
+        default: None
+        description:  user_id пользователя
+      - name: new_roles
+        in: body
+        type: array
+        required: true
+        default: None
+        description:  Названия ролей
+    responses:
+      200:
+        description: Добавление роли
+        schema:
+          {
+          "type": "object",
+          "properties": {
+            "error": {"type": "string"},
+            "result": {"type":  "string"}
+            }
+          }

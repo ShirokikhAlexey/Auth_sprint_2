@@ -1,0 +1,26 @@
+Добавление роли
+    ---
+    parameters:
+      - name: Authorization
+        in: headers
+        type: string
+        required: true
+        default: None
+        description:  Токен авторизации
+      - name: role_name
+        in: body
+        type: string
+        required: true
+        default: None
+        description:  Название роли
+    responses:
+      200:
+        description: Добавление роли
+        schema:
+          {
+          "type": "object",
+          "properties": {
+            "error": {"type": "string"},
+            "result": {"type":  "string"}
+            }
+          }

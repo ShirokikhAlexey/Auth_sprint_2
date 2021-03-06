@@ -1,0 +1,26 @@
+Добавление типа доступа
+    ---
+    parameters:
+      - name: Authorization
+        in: headers
+        type: string
+        required: true
+        default: None
+        description:  Токен авторизации
+      - name: permission_name
+        in: body
+        type: string
+        required: true
+        default: None
+        description:  тип доступа
+    responses:
+      200:
+        description: Добавление роли
+        schema:
+          {
+          "type": "object",
+          "properties": {
+            "error": {"type": "string"},
+            "result": {"type":  "string"}
+            }
+          }

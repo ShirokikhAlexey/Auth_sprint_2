@@ -16,6 +16,8 @@ from service.change_pwd import change_pwd
 from service.history import get_login_history
 from service.change_login import change_login
 from service.confirm import confirm_email
+from service.permissions import create_permission, add_permission_to_role
+from service.roles import change_user_roles, create_role
 from common import settings
 from common.errors import ServiceError
 from schemas.change_pwd import NewPassword
@@ -24,6 +26,10 @@ from schemas.sign_up import SignUpSchema
 from schemas.history import HistorySchema
 from schemas.change_login import NewLogin
 from schemas.create_su import SUSchema
+from schemas.add_permission import AddPermissionSchema
+from schemas.add_role import AddRoleSchema
+from schemas.add_role_permission import AddPermissionRoleSchema
+from schemas.change_roles import ChangeUserRolesSchema
 
 
 app = Flask(__name__)
@@ -34,8 +40,8 @@ swagger = Swagger(app)
 
 
 @app.route('/', methods=['POST'])
-@swag_from('schemas_docs/auth.yml')
 @check_permissions_decorator()
+@swag_from('schemas_docs/auth.yml')
 def auth(token_data):
     """
     Проверка валидности токена авторизации
@@ -190,6 +196,7 @@ def history(token_data):
 
 @app.route('/create_superuser', methods=['POST'])
 @check_permissions_decorator(['full'])
+@swag_from('schemas_docs/create_superuser.yml')
 def create_superuser(token_data):
     session = db.session
     req = request.get_json()
@@ -207,6 +214,86 @@ def create_superuser(token_data):
         return {'error': e.msg, 'result': None}
 
     return {'error': None, 'result': "Account successfully created. Please, confirm your email."}
+
+
+@app.route('/add_role', methods=['POST'])
+@check_permissions_decorator(['full'])
+@swag_from('schemas_docs/add_role.yml')
+def add_new_role(token_data):
+    session = db.session
+    req = request.get_json()
+
+    try:
+        AddRoleSchema().load(req)
+    except ValidationError as e:
+        return {'error': e.messages, 'result': None}
+
+    try:
+        create_role(session, req.get('role_name'))
+    except ServiceError as e:
+        return {'error': e.msg, 'result': None}
+
+    return {'error': None, 'result': "New role successfully created."}
+
+
+@app.route('/change_user_roles', methods=['POST'])
+@check_permissions_decorator(['full'])
+@swag_from('schemas_docs/change_user_roles.yml')
+def new_user_roles(token_data):
+    session = db.session
+    req = request.get_json()
+
+    try:
+        ChangeUserRolesSchema().load(req)
+    except ValidationError as e:
+        return {'error': e.messages, 'result': None}
+
+    try:
+        change_user_roles(session, req.get('user_id'), req.get('new_roles'))
+    except ServiceError as e:
+        return {'error': e.msg, 'result': None}
+
+    return {'error': None, 'result': "You successfully changed user roles."}
+
+
+@app.route('/create_permission', methods=['POST'])
+@check_permissions_decorator(['full'])
+@swag_from('schemas_docs/create_permission.yml')
+def add_new_permission(token_data):
+    session = db.session
+    req = request.get_json()
+
+    try:
+        AddPermissionSchema().load(req)
+    except ValidationError as e:
+        return {'error': e.messages, 'result': None}
+
+    try:
+        create_permission(session, req.get('permission_name'))
+    except ServiceError as e:
+        return {'error': e.msg, 'result': None}
+
+    return {'error': None, 'result': "New permission successfully created."}
+
+
+@app.route('/add_permission_to_role', methods=['POST'])
+@check_permissions_decorator(['full'])
+@swag_from('schemas_docs/add_permission_to_role.yml')
+def new_role_permission(token_data):
+    session = db.session
+    req = request.get_json()
+
+    try:
+        AddPermissionRoleSchema().load(req)
+    except ValidationError as e:
+        return {'error': e.messages, 'result': None}
+
+    try:
+        add_permission_to_role(session, req.get('permission_name'), req.get('role_name'))
+    except ServiceError as e:
+        return {'error': e.msg, 'result': None}
+
+    return {'error': None, 'result': "You successfully added permission to role."}
 
 
 def main():

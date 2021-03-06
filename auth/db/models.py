@@ -48,7 +48,6 @@ class Role(db.Model):
     __table_args__ = {"schema": "content"}
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     name = db.Column(db.String, unique=True, nullable=False, index=True)
-    decr = db.Column(db.String, nullable=True)
     created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
     updated_at = db.Column(db.TIMESTAMP, default=None, onupdate=datetime.now())
 
@@ -59,6 +58,7 @@ class UserRole(db.Model):
 
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('content.users.id'), primary_key=True, nullable=False)
     role_id = db.Column(UUID(as_uuid=True), db.ForeignKey('content.roles.id'), primary_key=True, nullable=False)
+    active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
     updated_at = db.Column(db.TIMESTAMP, default=None, onupdate=datetime.now())
 
@@ -68,7 +68,6 @@ class Permission(db.Model):
     __table_args__ = {"schema": "content"}
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     name = db.Column(db.String, unique=True, nullable=False, index=True)
-    decr = db.Column(db.String, nullable=True)
     created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
     updated_at = db.Column(db.TIMESTAMP, default=None, onupdate=datetime.now())
 
@@ -80,5 +79,6 @@ class RolePermission(db.Model):
     permission_id = db.Column(UUID(as_uuid=True), db.ForeignKey('content.permissions.id'),
                               primary_key=True, nullable=False)
     role_id = db.Column(UUID(as_uuid=True), db.ForeignKey('content.roles.id'), primary_key=True, nullable=False)
+    active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
     updated_at = db.Column(db.TIMESTAMP, default=None, onupdate=datetime.now())

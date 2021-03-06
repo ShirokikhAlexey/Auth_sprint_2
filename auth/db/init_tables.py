@@ -30,20 +30,21 @@ def create_tables():
     session.add(UserRole(user_id=admin.id, role_id=super_role.id))
     session.add(RolePermission(permission_id=super_wrights.id, role_id=super_role.id))
 
+    test = User(
+        login=settings.TEST_USER_LOGIN,
+        password=bcrypt.hashpw(bytes(settings.TEST_USER_PWD, 'utf-8'), bcrypt.gensalt()).decode('utf-8'),
+        email=settings.TEST_USER_EMAIL,
+        confirmed=True
+    )
+    session.add(test)
+
     common_role = Role(name='authorized')
     session.add(common_role)
     common_wrights = Permission(name='authorized')
     session.add(common_wrights)
     session.flush()
+    session.add(UserRole(user_id=test.id, role_id=common_role.id))
     session.add(RolePermission(permission_id=common_wrights.id, role_id=common_role.id))
-
-    basic_role = Role(name='anonymous')
-    session.add(basic_role)
-    basic_wrights = Permission(name='basic')
-    session.add(basic_wrights)
-    session.flush()
-    session.add(RolePermission(permission_id=basic_wrights.id, role_id=basic_role.id))
-    session.add(RolePermission(permission_id=basic_wrights.id, role_id=common_role.id))
 
     session.commit()
 

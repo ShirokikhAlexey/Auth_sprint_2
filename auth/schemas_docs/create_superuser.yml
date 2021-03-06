@@ -1,0 +1,38 @@
+Создание суперпользователя
+    ---
+    parameters:
+      - name: Authorization
+        in: headers
+        type: string
+        required: true
+        default: None
+        description:  Токен авторизации
+      - name: password
+        in: body
+        type: string
+        required: true
+        default: None
+        description:  Пароль
+      - name: email
+        in: body
+        type: string
+        required: true
+        default: None
+        description:  Email
+      - name: login
+        in: body
+        type: string
+        required: true
+        default: None
+        description:  Логин
+    responses:
+      200:
+        description:  Создание суперпользователя
+        schema:
+          {
+          "type": "object",
+          "properties": {
+            "error": {"type": "string"},
+            "result": {"type":  "string"}
+            }
+          }

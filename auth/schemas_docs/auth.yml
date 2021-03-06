@@ -1,4 +1,4 @@
-Проверка валидности токена авторизации
+Проверка валидности токена авторизации и прав доступа
     ---
     parameters:
       - name: Authorization
@@ -18,7 +18,8 @@
             "result": {"type":  "object",
                        "properties": {
                        "user": {"type": "string"},
-                       "logged_in": {"type": "number"}
+                       "logged_in": {"type": ["number", "null"]},
+                       "permissions": {"type": "array"}
                        }}
             }
           }
