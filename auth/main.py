@@ -5,6 +5,8 @@ from flask import Flask, request, render_template, url_for, redirect
 from flask_mail import Mail
 from flasgger import Swagger, swag_from
 from marshmallow import ValidationError
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from db.db import init_db, db
 from db.init_tables import create_tables
@@ -39,10 +41,16 @@ mail = Mail(app)
 
 swagger = Swagger(app)
 
+limiter = Limiter(
+    app,
+    key_func=get_remote_address
+)
+
 
 @app.route('/', methods=['POST'])
 @check_permissions_decorator()
 @swag_from('schemas_docs/auth.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def auth(token_data):
     """
     Проверка валидности токена авторизации
@@ -52,6 +60,7 @@ def auth(token_data):
 
 @app.route('/login', methods=['POST', 'GET'])
 @swag_from('schemas_docs/login.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def login(device='web'):
     """
     Авторизация пользователя по логину или email. Получение токена сессии.
@@ -80,6 +89,7 @@ def login(device='web'):
 
 @app.route('/sign-up', methods=['POST', 'GET'])
 @swag_from('schemas_docs/sign_up.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def sign_up(device='web'):
     """
     Регистрация пользователя по email.
@@ -106,6 +116,7 @@ def sign_up(device='web'):
 
 
 @app.route('/sign-up/<provider>')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def oauth_sign_up(provider):
     oauth = OAuthSignIn.get_provider(provider)
     oauth.device = request.args['device']
@@ -113,6 +124,7 @@ def oauth_sign_up(provider):
 
 
 @app.route('/callback/<provider>')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def oauth_callback(provider):
     oauth = OAuthSignIn.get_provider(provider)
     email = oauth.callback()
@@ -130,6 +142,7 @@ def oauth_callback(provider):
 
 @app.route('/confirm/<token>')
 @swag_from('schemas_docs/confirm.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def confirm_email_route(token):
     """
     Подтвердждение email
@@ -147,6 +160,7 @@ def confirm_email_route(token):
 @app.route('/logout', methods=['POST'])
 @check_auth_decorator
 @swag_from('schemas_docs/logout.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def logout(token_data):
     """
     Выход из сессии
@@ -163,6 +177,7 @@ def logout(token_data):
 @app.route('/change_password', methods=['POST'])
 @check_auth_decorator
 @swag_from('schemas_docs/change_password.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def change_password(token_data):
     """
     Смена пароля пользователя
@@ -186,6 +201,7 @@ def change_password(token_data):
 @app.route('/change_login', methods=['POST'])
 @check_auth_decorator
 @swag_from('schemas_docs/change_login.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def set_new_login(token_data):
     """
     Смена логина пользователя
@@ -209,6 +225,7 @@ def set_new_login(token_data):
 @app.route('/history', methods=['POST'])
 @check_auth_decorator
 @swag_from('schemas_docs/history.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def history(token_data):
     """
     Получение истоиии входов пользователя
@@ -232,6 +249,7 @@ def history(token_data):
 @app.route('/create_superuser', methods=['POST'])
 @check_permissions_decorator(['full'])
 @swag_from('schemas_docs/create_superuser.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def create_superuser(token_data):
     session = db.session
     req = request.get_json()
@@ -254,6 +272,7 @@ def create_superuser(token_data):
 @app.route('/add_role', methods=['POST'])
 @check_permissions_decorator(['full'])
 @swag_from('schemas_docs/add_role.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def add_new_role(token_data):
     session = db.session
     req = request.get_json()
@@ -274,6 +293,7 @@ def add_new_role(token_data):
 @app.route('/change_user_roles', methods=['POST'])
 @check_permissions_decorator(['full'])
 @swag_from('schemas_docs/change_user_roles.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def new_user_roles(token_data):
     session = db.session
     req = request.get_json()
@@ -294,6 +314,7 @@ def new_user_roles(token_data):
 @app.route('/create_permission', methods=['POST'])
 @check_permissions_decorator(['full'])
 @swag_from('schemas_docs/create_permission.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def add_new_permission(token_data):
     session = db.session
     req = request.get_json()
@@ -314,6 +335,7 @@ def add_new_permission(token_data):
 @app.route('/add_permission_to_role', methods=['POST'])
 @check_permissions_decorator(['full'])
 @swag_from('schemas_docs/add_permission_to_role.yml')
+@limiter.limit(settings.REQUEST_LIMIT_PER_MINUTE)
 def new_role_permission(token_data):
     session = db.session
     req = request.get_json()

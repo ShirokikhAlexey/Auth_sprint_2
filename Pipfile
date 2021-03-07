@@ -22,6 +22,8 @@ marshmallow = "==3.10.0"
 flask-mail = "*"
 requests = "*"
 rauth = "*"
+flask-limiter = "*"
+grpcio = "*"
 
 [requires]
 python_version = "3.8"

@@ -3,6 +3,7 @@ import random
 import string
 import re
 from datetime import datetime
+import abc
 
 import bcrypt
 from flask import url_for, redirect, request
@@ -14,7 +15,7 @@ from service.log_in import get_device_by_name, get_user_permissions, encode_auth
 from service.sign_up import add_user_roles, check_roles
 
 
-class OAuthSignIn(object):
+class OAuthSignIn(abc.ABC):
     providers = None
 
     def __init__(self, provider_name):
