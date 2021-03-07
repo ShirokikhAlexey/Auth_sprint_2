@@ -36,3 +36,14 @@ TEST_ADMIN_EMAIL = os.getenv('TEST_ADMIN_EMAIL')
 TEST_USER_LOGIN = os.getenv('TEST_USER_LOGIN')
 TEST_USER_PWD = os.getenv('TEST_USER_PWD')
 TEST_USER_EMAIL = os.getenv('TEST_USER_EMAIL')
+
+OAUTH_CREDENTIALS = {
+    'vk': {
+        "id": os.getenv('VK_ID'),
+        "secret": os.getenv('VK_SECRET')
+    }
+}
+
+VK_AUTHORIZE_URL = os.getenv('VK_AUTHORIZE_URL')
+VK_ACCESS_TOKEN_URL = os.getenv('VK_ACCESS_TOKEN_URL')
+VK_BASE_URL = os.getenv('VK_BASE_URL')

@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
 
-from flask import Flask, request
+from flask import Flask, request, render_template, url_for, redirect
 from flask_mail import Mail
 from flasgger import Swagger, swag_from
 from marshmallow import ValidationError
@@ -18,6 +18,7 @@ from service.change_login import change_login
 from service.confirm import confirm_email
 from service.permissions import create_permission, add_permission_to_role
 from service.roles import change_user_roles, create_role
+from service.oauth import OAuthSignIn, sign_up_oauth
 from common import settings
 from common.errors import ServiceError
 from schemas.change_pwd import NewPassword
@@ -49,19 +50,25 @@ def auth(token_data):
     return token_data
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['POST', 'GET'])
 @swag_from('schemas_docs/login.yml')
-def login():
+def login(device='web'):
     """
     Авторизация пользователя по логину или email. Получение токена сессии.
     """
     session = db.session
     req = request.get_json()
+    if request.method == 'GET':
+        return render_template('log_in.html', url=url_for('oauth_sign_up', provider='vk', device=device,
+                                                          _external=True))
 
     try:
         LoginSchema().load(req)
     except ValidationError as e:
         return {'error': e.messages, 'result': None}
+
+    if req.get('oauth'):
+        return redirect(url_for('oauth_sign_up', provider=req.get('oauth'), device=req.get('device'), _external=True))
 
     try:
         gen_token = log_in_user(session, req, req.get('device', 'web'))
@@ -71,19 +78,24 @@ def login():
     return {'error': None, 'result': {"token": gen_token}}
 
 
-@app.route('/sign-up', methods=['POST'])
+@app.route('/sign-up', methods=['POST', 'GET'])
 @swag_from('schemas_docs/sign_up.yml')
-def sign_up():
+def sign_up(device='web'):
     """
     Регистрация пользователя по email.
     """
     session = db.session
     req = request.get_json()
-
+    if request.method == 'GET':
+        return render_template('sign_up.html', url=url_for('oauth_sign_up', provider='vk', device=device,
+                                                           _external=True))
     try:
         SignUpSchema().load(req)
     except ValidationError as e:
         return {'error': e.messages, 'result': None}
+
+    if req.get('oauth'):
+        return redirect(url_for('oauth_sign_up', provider=req.get('oauth'), device=req.get('device'), _external=True))
 
     try:
         sign_up_user(mail, session, req)
@@ -91,6 +103,29 @@ def sign_up():
         return {'error': e.msg, 'result': None}
 
     return {'error': None, 'result': "Account successfully created. Please, confirm your email."}
+
+
+@app.route('/sign-up/<provider>')
+def oauth_sign_up(provider):
+    oauth = OAuthSignIn.get_provider(provider)
+    oauth.device = request.args['device']
+    return oauth.authorize()
+
+
+@app.route('/callback/<provider>')
+def oauth_callback(provider):
+    oauth = OAuthSignIn.get_provider(provider)
+    email = oauth.callback()
+    session = db.session
+    if email is None:
+        return {'error': 'Authorization failed', 'result': None}
+
+    try:
+        token = sign_up_oauth(session, email, oauth.device)
+    except ServiceError as e:
+        return {'error': e.msg, 'result': None}
+    return {'error': None, 'result': token,
+            'msg': "You successfully logged in. Please, change your password and login"}
 
 
 @app.route('/confirm/<token>')
