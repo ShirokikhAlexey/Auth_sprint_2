@@ -1,41 +1,21 @@
-from datetime import datetime
-import json
+from concurrent import futures
 
-from flask import Flask, render_template, url_for, redirect
-from flask_mail import Mail
-from flasgger import Swagger, swag_from
-from marshmallow import ValidationError
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+import grpc
+from flask import url_for, redirect
 
-from db.db import init_db, db
-from db.init_tables import create_tables
-from db import redis
+from db.db import db
 from service.sign_up import sign_up_user
 from service.log_in import log_in_user
-from service.auth import check_auth_decorator, check_permissions_decorator, check_user_permissions
+from service.auth import check_user_permissions
 from service.change_pwd import change_pwd
 from service.history import get_login_history
 from service.change_login import change_login
-from service.confirm import confirm_email
 from service.permissions import create_permission, add_permission_to_role
 from service.roles import change_user_roles, create_role
-from service.oauth import OAuthSignIn, sign_up_oauth
-from common import settings
 from common.errors import ServiceError
-from schemas.change_pwd import NewPassword
-from schemas.login import LoginSchema
-from schemas.sign_up import SignUpSchema
-from schemas.history import HistorySchema
-from schemas.change_login import NewLogin
-from schemas.create_su import SUSchema
-from schemas.add_permission import AddPermissionSchema
-from schemas.add_role import AddRoleSchema
-from schemas.add_role_permission import AddPermissionRoleSchema
-from schemas.change_roles import ChangeUserRolesSchema
-from grpc_.protos.auth_pb2 import AddPermissionReply, AddRoleReply, AddPermissionRoleReply, NewLoginReply, \
-    NewPasswordReply, ChangeUserRolesReply, CreateSUReply, HistoryReply
-from grpc_.protos.auth_pb2_grpc import AuthServicer
+from grpc_.auth_pb2 import AddPermissionReply, AddRoleReply, AddPermissionRoleReply, NewLoginReply, \
+    NewPasswordReply, ChangeUserRolesReply, CreateSUReply, HistoryReply, LoginReply, SignUpReply, MainPageReply
+from grpc_.auth_pb2_grpc import AuthServicer, add_AuthServicer_to_server
 from main import app, mail
 
 
@@ -137,7 +117,7 @@ class AuthGRPCService(AuthServicer):
             try:
                 data = check_user_permissions(request.auth_token)
             except ServiceError as e:
-                return HistoryReply(error=e.msg, result=None)
+                return LoginReply(error=e.msg, result=None)
 
             if request.oauth:
                 return redirect(
@@ -163,7 +143,7 @@ class AuthGRPCService(AuthServicer):
             try:
                 data = check_user_permissions(request.auth_token)
             except ServiceError as e:
-                return HistoryReply(error=e.msg, result=None)
+                return SignUpReply(error=e.msg, result=None)
 
             if request.oauth:
                 return redirect(
@@ -179,6 +159,30 @@ class AuthGRPCService(AuthServicer):
             try:
                 gen_token = log_in_user(session, req, req.get('device', 'web'))
             except ServiceError as e:
-                return LoginReply(error=e.msg, result=None)
+                return SignUpReply(error=e.msg, result=None)
 
-            return LoginReply(error=None, result=gen_token)
+            return SignUpReply(error=None, result=gen_token)
+
+    def MainPage(self, request, context):
+        with app.app_context():
+            try:
+                data = check_user_permissions(request.auth_token)
+            except ServiceError as e:
+                return MainPageReply(error=e.msg, result=None)
+
+            return MainPageReply(error=None, result=data)
+
+
+def serve():
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    add_AuthServicer_to_server(
+      AuthGRPCService(), server)
+    server.add_insecure_port('[::]:50051')
+    server.start()
+    print('GRPC started')
+    server.wait_for_termination()
+    print('GRPC stopped')
+
+
+if __name__=='__main__':
+    serve()
