@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package auth;
+
+service Auth {
+  rpc AddPermission (AddPermissionRequest) returns (AddPermissionReply) {};
+  rpc AddRole (AddRoleRequest) returns (AddRoleReply) {};
+  rpc AddPermissionRole (AddPermissionRoleRequest) returns (AddPermissionRoleReply) {};
+  rpc NewLogin (NewLoginRequest) returns (NewLoginReply) {};
+  rpc NewPassword (NewPasswordRequest) returns (NewPasswordReply) {};
+  rpc ChangeUserRoles (ChangeUserRolesRequest) returns (ChangeUserRolesReply) {};
+  rpc CreateSU (CreateSURequest) returns (CreateSUReply) {};
+  rpc History (HistoryRequest) returns (HistoryReply) {};
+  rpc Login (LoginRequest) returns (LoginReply) {};
+  rpc SignUp (SignUpRequest) returns (SignUpReply) {};
+  rpc MainPage (MainPageRequest) returns (MainPageReply) {};
+
+}
+
+message AddPermissionRequest {
+  string permission_name = 1;
+  string auth_token = 2;
+}
+
+message AddPermissionReply {
+  string error = 1;
+  string result = 2;
+}
+
+
+message AddRoleRequest {
+  string role_name = 1;
+  string auth_token = 2;
+}
+
+message AddRoleReply {
+  string error = 1;
+  string result = 2;
+}
+
+message AddPermissionRoleRequest {
+  string permission_name = 1;
+  string role_name = 2;
+  string auth_token = 3;
+}
+
+message AddPermissionRoleReply {
+  string error = 1;
+  string result = 2;
+}
+
+message NewLoginRequest {
+  string permission_name = 1;
+  string role_name = 2;
+  string auth_token = 3;
+}
+
+message NewLoginReply {
+  string error = 1;
+  string result = 2;
+}
+
+message NewPasswordRequest {
+  string new_password = 1;
+  string auth_token = 2;
+}
+
+message NewPasswordReply {
+  string error = 1;
+  string result = 2;
+}
+
+message ChangeUserRolesRequest {
+  string user_id = 1;
+  repeated string new_roles = 2;
+  string auth_token = 4;
+}
+
+message ChangeUserRolesReply {
+  string error = 1;
+  string result = 2;
+}
+
+message CreateSURequest {
+  string password = 1;
+  string email = 2;
+  string login = 3;
+  string auth_token = 4;
+}
+
+message CreateSUReply {
+  string error = 1;
+  string result = 2;
+}
+
+message HistoryRequest {
+  string date_start = 1;
+  string date_end = 2;
+  string auth_token = 3;
+}
+
+message HistoryReply {
+  string error = 1;
+  string result = 2;
+}
+
+message LoginRequest {
+  string password = 1;
+  string device = 2;
+  string email = 3;
+  string login = 4;
+  string recaptcha = 5;
+}
+
+message LoginReply {
+  string error = 1;
+  string result = 2;
+}
+
+message SignUpRequest {
+  string password = 1;
+  string email = 2;
+  string login = 3;
+  repeated string roles = 4;
+  string oauth = 5;
+  string device = 6;
+}
+
+message SignUpReply {
+  string error = 1;
+  string result = 2;
+}
+
+message MainPageRequest {
+  string auth_token = 1;
+}
+
+message MainPageReply {
+  string error = 1;
+  string result = 2;
+}
